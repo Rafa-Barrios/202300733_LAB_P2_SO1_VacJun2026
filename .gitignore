@@ -1,0 +1,19 @@
+# Rust
+rust-api/target/
+
+# Go
+go-deployment1/bin/
+go-deployment2/bin/
+go-consumer/bin/
+
+# Binarios
+*.exe
+*.out
+
+# Variables de entorno
+.env
+*.env
+
+# Credenciales GCP
+*.json
+service-account*.json
