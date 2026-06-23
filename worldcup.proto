@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package worldcup;
+
+option go_package = "./worldcup";
+
+service PredictionService {
+  rpc SendPrediction (PredictionRequest) returns (PredictionResponse);
+}
+
+message PredictionRequest {
+  string home_team = 1;
+  string away_team = 2;
+  int32  home_goals = 3;
+  int32  away_goals = 4;
+  string username   = 5;
+  string timestamp  = 6;
+}
+
+message PredictionResponse {
+  bool   success = 1;
+  string message = 2;
+}
