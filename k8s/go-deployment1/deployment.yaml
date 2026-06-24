@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-deployment1
+  namespace: sopes1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-deployment1
+  template:
+    metadata:
+      labels:
+        app: go-deployment1
+    spec:
+      containers:
+      - name: go-client
+        image: 34.59.122.115:5000/sopes1/go-deployment1:v1.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        - name: GRPC_SERVER_ADDR
+          value: "go-deployment2-service.sopes1.svc.cluster.local:50051"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 3
