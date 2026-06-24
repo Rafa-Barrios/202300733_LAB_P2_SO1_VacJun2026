@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: configure-containerd
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: configure-containerd
+  template:
+    metadata:
+      labels:
+        app: configure-containerd
+    spec:
+      hostPID: true
+      hostNetwork: true
+      initContainers:
+      - name: configure
+        image: alpine:3.19
+        securityContext:
+          privileged: true
+        command:
+        - sh
+        - -c
+        - |
+          mkdir -p /host/etc/containerd/certs.d/34.59.122.115:5000
+          cat > /host/etc/containerd/certs.d/34.59.122.115:5000/hosts.toml << 'TOML'
+          server = "http://34.59.122.115:5000"
+          [host."http://34.59.122.115:5000"]
+            capabilities = ["pull", "resolve"]
+          TOML
+          nsenter --mount=/proc/1/ns/mnt -- systemctl restart containerd || true
+        volumeMounts:
+        - name: host-etc
+          mountPath: /host/etc
+      containers:
+      - name: pause
+        image: gcr.io/google-containers/pause:3.9
+      volumes:
+      - name: host-etc
+        hostPath:
+          path: /etc
