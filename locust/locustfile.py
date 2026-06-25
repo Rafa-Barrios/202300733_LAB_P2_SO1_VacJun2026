@@ -26,7 +26,7 @@ class PredictionUser(HttpUser):
         }
 
         self.client.post(
-            "/grpc-202300733/predict",
+            "/predict",
             json=payload,
             headers={"Content-Type": "application/json"}
         )
