@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-consumer
+  namespace: sopes1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-consumer
+  template:
+    metadata:
+      labels:
+        app: go-consumer
+    spec:
+      containers:
+      - name: go-consumer
+        image: 34.59.122.115:5000/sopes1/go-consumer:v1.0
+        env:
+        - name: RABBITMQ_URL
+          value: "amqp://admin:admin123@rabbitmq.sopes1.svc.cluster.local:5672/"
+        - name: VALKEY_ADDR
+          value: "valkey-service.sopes1.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "256Mi"
