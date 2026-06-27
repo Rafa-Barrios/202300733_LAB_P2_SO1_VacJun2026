@@ -23,6 +23,8 @@ spec:
           value: "50051"
         - name: RABBITMQ_URL
           value: "amqp://admin:admin123@rabbitmq.sopes1.svc.cluster.local:5672/"
+        - name: CONTAINER_ROLE
+          value: "grpc-server"
         resources:
           requests:
             cpu: "100m"
@@ -30,3 +32,21 @@ spec:
           limits:
             cpu: "500m"
             memory: "256Mi"
+      - name: rabbitmq-writer
+        image: 34.59.122.115:5000/sopes1/go-deployment2:v1.0
+        ports:
+        - containerPort: 50052
+        env:
+        - name: GRPC_PORT
+          value: "50052"
+        - name: RABBITMQ_URL
+          value: "amqp://admin:admin123@rabbitmq.sopes1.svc.cluster.local:5672/"
+        - name: CONTAINER_ROLE
+          value: "rabbitmq-writer"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "128Mi"

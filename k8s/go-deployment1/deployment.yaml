@@ -14,7 +14,7 @@ spec:
         app: go-deployment1
     spec:
       containers:
-      - name: go-client
+      - name: api-rest
         image: 34.59.122.115:5000/sopes1/go-deployment1:v1.0
         ports:
         - containerPort: 8080
@@ -23,6 +23,8 @@ spec:
           value: "8080"
         - name: GRPC_SERVER_ADDR
           value: "go-deployment2-service.sopes1.svc.cluster.local:50051"
+        - name: CONTAINER_ROLE
+          value: "api-rest"
         resources:
           requests:
             cpu: "100m"
@@ -42,3 +44,27 @@ spec:
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 3
+      - name: grpc-client
+        image: 34.59.122.115:5000/sopes1/go-deployment1:v1.0
+        ports:
+        - containerPort: 8081
+        env:
+        - name: PORT
+          value: "8081"
+        - name: GRPC_SERVER_ADDR
+          value: "go-deployment2-service.sopes1.svc.cluster.local:50051"
+        - name: CONTAINER_ROLE
+          value: "grpc-client"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "128Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 10
+          periodSeconds: 5
