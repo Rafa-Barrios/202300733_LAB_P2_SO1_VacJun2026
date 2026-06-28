@@ -1,0 +1,49 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-grafana
+  namespace: sopes1
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-grafana
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        memory:
+          guest: 2Gi
+        devices:
+          disks:
+          - name: containerdisk
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          - name: emptydisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            masquerade: {}
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: containerdisk
+        containerDisk:
+          image: quay.io/containerdisks/ubuntu:22.04
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            user: ubuntu
+            password: ubuntu123
+            chpasswd:
+              expire: false
+      - name: emptydisk
+        emptyDisk:
+          capacity: 5Gi
