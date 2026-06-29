@@ -4,7 +4,7 @@
 // 	protoc        v3.21.12
 // source: worldcup.proto
 
-package worldcup
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -21,10 +21,68 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type PredictionRequest struct {
+type Teams int32
+
+const (
+	Teams_TEAMS_UNKNOWN Teams = 0
+	Teams_GTM           Teams = 1
+	Teams_MEX           Teams = 2
+	Teams_BRA           Teams = 3
+	Teams_ARG           Teams = 4
+	Teams_ESP           Teams = 5
+)
+
+// Enum value maps for Teams.
+var (
+	Teams_name = map[int32]string{
+		0: "TEAMS_UNKNOWN",
+		1: "GTM",
+		2: "MEX",
+		3: "BRA",
+		4: "ARG",
+		5: "ESP",
+	}
+	Teams_value = map[string]int32{
+		"TEAMS_UNKNOWN": 0,
+		"GTM":           1,
+		"MEX":           2,
+		"BRA":           3,
+		"ARG":           4,
+		"ESP":           5,
+	}
+)
+
+func (x Teams) Enum() *Teams {
+	p := new(Teams)
+	*p = x
+	return p
+}
+
+func (x Teams) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Teams) Descriptor() protoreflect.EnumDescriptor {
+	return file_worldcup_proto_enumTypes[0].Descriptor()
+}
+
+func (Teams) Type() protoreflect.EnumType {
+	return &file_worldcup_proto_enumTypes[0]
+}
+
+func (x Teams) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Teams.Descriptor instead.
+func (Teams) EnumDescriptor() ([]byte, []int) {
+	return file_worldcup_proto_rawDescGZIP(), []int{0}
+}
+
+type MatchPredictionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	HomeTeam      string                 `protobuf:"bytes,1,opt,name=home_team,json=homeTeam,proto3" json:"home_team,omitempty"`
-	AwayTeam      string                 `protobuf:"bytes,2,opt,name=away_team,json=awayTeam,proto3" json:"away_team,omitempty"`
+	HomeTeam      Teams                  `protobuf:"varint,1,opt,name=home_team,json=homeTeam,proto3,enum=worldcup2026.Teams" json:"home_team,omitempty"`
+	AwayTeam      Teams                  `protobuf:"varint,2,opt,name=away_team,json=awayTeam,proto3,enum=worldcup2026.Teams" json:"away_team,omitempty"`
 	HomeGoals     int32                  `protobuf:"varint,3,opt,name=home_goals,json=homeGoals,proto3" json:"home_goals,omitempty"`
 	AwayGoals     int32                  `protobuf:"varint,4,opt,name=away_goals,json=awayGoals,proto3" json:"away_goals,omitempty"`
 	Username      string                 `protobuf:"bytes,5,opt,name=username,proto3" json:"username,omitempty"`
@@ -33,20 +91,20 @@ type PredictionRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *PredictionRequest) Reset() {
-	*x = PredictionRequest{}
+func (x *MatchPredictionRequest) Reset() {
+	*x = MatchPredictionRequest{}
 	mi := &file_worldcup_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PredictionRequest) String() string {
+func (x *MatchPredictionRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PredictionRequest) ProtoMessage() {}
+func (*MatchPredictionRequest) ProtoMessage() {}
 
-func (x *PredictionRequest) ProtoReflect() protoreflect.Message {
+func (x *MatchPredictionRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_worldcup_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,75 +116,74 @@ func (x *PredictionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PredictionRequest.ProtoReflect.Descriptor instead.
-func (*PredictionRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use MatchPredictionRequest.ProtoReflect.Descriptor instead.
+func (*MatchPredictionRequest) Descriptor() ([]byte, []int) {
 	return file_worldcup_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *PredictionRequest) GetHomeTeam() string {
+func (x *MatchPredictionRequest) GetHomeTeam() Teams {
 	if x != nil {
 		return x.HomeTeam
 	}
-	return ""
+	return Teams_TEAMS_UNKNOWN
 }
 
-func (x *PredictionRequest) GetAwayTeam() string {
+func (x *MatchPredictionRequest) GetAwayTeam() Teams {
 	if x != nil {
 		return x.AwayTeam
 	}
-	return ""
+	return Teams_TEAMS_UNKNOWN
 }
 
-func (x *PredictionRequest) GetHomeGoals() int32 {
+func (x *MatchPredictionRequest) GetHomeGoals() int32 {
 	if x != nil {
 		return x.HomeGoals
 	}
 	return 0
 }
 
-func (x *PredictionRequest) GetAwayGoals() int32 {
+func (x *MatchPredictionRequest) GetAwayGoals() int32 {
 	if x != nil {
 		return x.AwayGoals
 	}
 	return 0
 }
 
-func (x *PredictionRequest) GetUsername() string {
+func (x *MatchPredictionRequest) GetUsername() string {
 	if x != nil {
 		return x.Username
 	}
 	return ""
 }
 
-func (x *PredictionRequest) GetTimestamp() string {
+func (x *MatchPredictionRequest) GetTimestamp() string {
 	if x != nil {
 		return x.Timestamp
 	}
 	return ""
 }
 
-type PredictionResponse struct {
+type MatchPredictionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *PredictionResponse) Reset() {
-	*x = PredictionResponse{}
+func (x *MatchPredictionResponse) Reset() {
+	*x = MatchPredictionResponse{}
 	mi := &file_worldcup_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PredictionResponse) String() string {
+func (x *MatchPredictionResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PredictionResponse) ProtoMessage() {}
+func (*MatchPredictionResponse) ProtoMessage() {}
 
-func (x *PredictionResponse) ProtoReflect() protoreflect.Message {
+func (x *MatchPredictionResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_worldcup_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -138,21 +195,14 @@ func (x *PredictionResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PredictionResponse.ProtoReflect.Descriptor instead.
-func (*PredictionResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use MatchPredictionResponse.ProtoReflect.Descriptor instead.
+func (*MatchPredictionResponse) Descriptor() ([]byte, []int) {
 	return file_worldcup_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PredictionResponse) GetSuccess() bool {
+func (x *MatchPredictionResponse) GetStatus() string {
 	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *PredictionResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
+		return x.Status
 	}
 	return ""
 }
@@ -161,22 +211,27 @@ var File_worldcup_proto protoreflect.FileDescriptor
 
 const file_worldcup_proto_rawDesc = "" +
 	"\n" +
-	"\x0eworldcup.proto\x12\bworldcup\"\xc5\x01\n" +
-	"\x11PredictionRequest\x12\x1b\n" +
-	"\thome_team\x18\x01 \x01(\tR\bhomeTeam\x12\x1b\n" +
-	"\taway_team\x18\x02 \x01(\tR\bawayTeam\x12\x1d\n" +
+	"\x0eworldcup.proto\x12\fworldcup2026\"\xf4\x01\n" +
+	"\x16MatchPredictionRequest\x120\n" +
+	"\thome_team\x18\x01 \x01(\x0e2\x13.worldcup2026.TeamsR\bhomeTeam\x120\n" +
+	"\taway_team\x18\x02 \x01(\x0e2\x13.worldcup2026.TeamsR\bawayTeam\x12\x1d\n" +
 	"\n" +
 	"home_goals\x18\x03 \x01(\x05R\thomeGoals\x12\x1d\n" +
 	"\n" +
 	"away_goals\x18\x04 \x01(\x05R\tawayGoals\x12\x1a\n" +
 	"\busername\x18\x05 \x01(\tR\busername\x12\x1c\n" +
-	"\ttimestamp\x18\x06 \x01(\tR\ttimestamp\"H\n" +
-	"\x12PredictionResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2`\n" +
-	"\x11PredictionService\x12K\n" +
-	"\x0eSendPrediction\x12\x1b.worldcup.PredictionRequest\x1a\x1c.worldcup.PredictionResponseB\fZ\n" +
-	"./worldcupb\x06proto3"
+	"\ttimestamp\x18\x06 \x01(\tR\ttimestamp\"1\n" +
+	"\x17MatchPredictionResponse\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status*G\n" +
+	"\x05Teams\x12\x11\n" +
+	"\rTEAMS_UNKNOWN\x10\x00\x12\a\n" +
+	"\x03GTM\x10\x01\x12\a\n" +
+	"\x03MEX\x10\x02\x12\a\n" +
+	"\x03BRA\x10\x03\x12\a\n" +
+	"\x03ARG\x10\x04\x12\a\n" +
+	"\x03ESP\x10\x052w\n" +
+	"\x16MatchPredictionService\x12]\n" +
+	"\x0eSendPrediction\x12$.worldcup2026.MatchPredictionRequest\x1a%.worldcup2026.MatchPredictionResponseB\tZ\a./protob\x06proto3"
 
 var (
 	file_worldcup_proto_rawDescOnce sync.Once
@@ -190,19 +245,23 @@ func file_worldcup_proto_rawDescGZIP() []byte {
 	return file_worldcup_proto_rawDescData
 }
 
+var file_worldcup_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_worldcup_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_worldcup_proto_goTypes = []any{
-	(*PredictionRequest)(nil),  // 0: worldcup.PredictionRequest
-	(*PredictionResponse)(nil), // 1: worldcup.PredictionResponse
+	(Teams)(0),                      // 0: worldcup2026.Teams
+	(*MatchPredictionRequest)(nil),  // 1: worldcup2026.MatchPredictionRequest
+	(*MatchPredictionResponse)(nil), // 2: worldcup2026.MatchPredictionResponse
 }
 var file_worldcup_proto_depIdxs = []int32{
-	0, // 0: worldcup.PredictionService.SendPrediction:input_type -> worldcup.PredictionRequest
-	1, // 1: worldcup.PredictionService.SendPrediction:output_type -> worldcup.PredictionResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: worldcup2026.MatchPredictionRequest.home_team:type_name -> worldcup2026.Teams
+	0, // 1: worldcup2026.MatchPredictionRequest.away_team:type_name -> worldcup2026.Teams
+	1, // 2: worldcup2026.MatchPredictionService.SendPrediction:input_type -> worldcup2026.MatchPredictionRequest
+	2, // 3: worldcup2026.MatchPredictionService.SendPrediction:output_type -> worldcup2026.MatchPredictionResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_worldcup_proto_init() }
@@ -215,13 +274,14 @@ func file_worldcup_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worldcup_proto_rawDesc), len(file_worldcup_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_worldcup_proto_goTypes,
 		DependencyIndexes: file_worldcup_proto_depIdxs,
+		EnumInfos:         file_worldcup_proto_enumTypes,
 		MessageInfos:      file_worldcup_proto_msgTypes,
 	}.Build()
 	File_worldcup_proto = out.File

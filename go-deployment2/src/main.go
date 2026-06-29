@@ -13,26 +13,25 @@ import (
 )
 
 type server struct {
-	pb.UnimplementedPredictionServiceServer
+	pb.UnimplementedMatchPredictionServiceServer
 	rmqWriter *rabbitmq.Writer
 }
 
-func (s *server) SendPrediction(ctx context.Context, req *pb.PredictionRequest) (*pb.PredictionResponse, error) {
+func (s *server) SendPrediction(ctx context.Context, req *pb.MatchPredictionRequest) (*pb.MatchPredictionResponse, error) {
 	log.Printf("gRPC recibido: %s vs %s | %d-%d | user: %s",
-		req.HomeTeam, req.AwayTeam, req.HomeGoals, req.AwayGoals, req.Username)
+		req.HomeTeam.String(), req.AwayTeam.String(),
+		req.HomeGoals, req.AwayGoals, req.Username)
 
 	err := s.rmqWriter.Publish(req)
 	if err != nil {
 		log.Printf("Error publicando en RabbitMQ: %v", err)
-		return &pb.PredictionResponse{
-			Success: false,
-			Message: "Error publicando en RabbitMQ",
+		return &pb.MatchPredictionResponse{
+			Status: "error",
 		}, nil
 	}
 
-	return &pb.PredictionResponse{
-		Success: true,
-		Message: "Predicción publicada en RabbitMQ correctamente",
+	return &pb.MatchPredictionResponse{
+		Status: "ok",
 	}, nil
 }
 
@@ -59,7 +58,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterPredictionServiceServer(grpcServer, &server{rmqWriter: rmqWriter})
+	pb.RegisterMatchPredictionServiceServer(grpcServer, &server{rmqWriter: rmqWriter})
 
 	log.Printf("gRPC Server escuchando en puerto %s", grpcPort)
 	log.Printf("RabbitMQ URL: %s", rmqURL)

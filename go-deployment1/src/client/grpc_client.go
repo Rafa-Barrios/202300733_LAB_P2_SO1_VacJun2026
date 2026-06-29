@@ -19,6 +19,23 @@ func NewGRPCClient(addr string) *GRPCClient {
 	return &GRPCClient{addr: addr}
 }
 
+func stringToTeam(team string) pb.Teams {
+	switch team {
+	case "GTM":
+		return pb.Teams_GTM
+	case "MEX":
+		return pb.Teams_MEX
+	case "BRA":
+		return pb.Teams_BRA
+	case "ARG":
+		return pb.Teams_ARG
+	case "ESP":
+		return pb.Teams_ESP
+	default:
+		return pb.Teams_TEAMS_UNKNOWN
+	}
+}
+
 func (c *GRPCClient) SendPrediction(homeTeam, awayTeam string, homeGoals, awayGoals int32, username, timestamp string) error {
 	conn, err := grpc.NewClient(
 		c.addr,
@@ -29,14 +46,14 @@ func (c *GRPCClient) SendPrediction(homeTeam, awayTeam string, homeGoals, awayGo
 	}
 	defer conn.Close()
 
-	client := pb.NewPredictionServiceClient(conn)
+	client := pb.NewMatchPredictionServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	req := &pb.PredictionRequest{
-		HomeTeam:  homeTeam,
-		AwayTeam:  awayTeam,
+	req := &pb.MatchPredictionRequest{
+		HomeTeam:  stringToTeam(homeTeam),
+		AwayTeam:  stringToTeam(awayTeam),
 		HomeGoals: homeGoals,
 		AwayGoals: awayGoals,
 		Username:  username,
@@ -48,6 +65,6 @@ func (c *GRPCClient) SendPrediction(homeTeam, awayTeam string, homeGoals, awayGo
 		return err
 	}
 
-	log.Printf("Respuesta del gRPC Server: %s", resp.Message)
+	log.Printf("Respuesta del gRPC Server: %s", resp.Status)
 	return nil
 }

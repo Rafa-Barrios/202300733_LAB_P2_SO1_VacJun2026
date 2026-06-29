@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -23,7 +24,6 @@ type Prediction struct {
 func connectRabbitMQ(url string) (*amqp.Connection, *amqp.Channel, error) {
 	var conn *amqp.Connection
 	var err error
-
 	for i := 0; i < 10; i++ {
 		conn, err = amqp.Dial(url)
 		if err == nil {
@@ -35,31 +35,20 @@ func connectRabbitMQ(url string) (*amqp.Connection, *amqp.Channel, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, nil, err
 	}
-
-	_, err = ch.QueueDeclare(
-		"predictions",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
+	_, err = ch.QueueDeclare("predictions", true, false, false, false, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-
 	return conn, ch, nil
 }
 
 func connectValkey(addr string) (valkey.Client, error) {
 	var client valkey.Client
 	var err error
-
 	for i := 0; i < 10; i++ {
 		client, err = valkey.NewClient(valkey.ClientOption{
 			InitAddress: []string{addr},
@@ -74,50 +63,64 @@ func connectValkey(addr string) (valkey.Client, error) {
 }
 
 func storePrediction(ctx context.Context, client valkey.Client, pred Prediction) error {
-	// Incrementamos contador total de predicciones
-	err := client.Do(ctx, client.B().Incr().Key("total:predictions").Build()).Error()
-	if err != nil {
-		return err
-	}
+	// Total predicciones general
+	client.Do(ctx, client.B().Incr().Key("total:predictions").Build())
 
-	// Guardamos predicciones por equipo MEX
+	// Predicciones del equipo MEX
 	if pred.HomeTeam == "MEX" || pred.AwayTeam == "MEX" {
-		err = client.Do(ctx, client.B().Incr().Key("mex:total").Build()).Error()
-		if err != nil {
-			return err
-		}
+		client.Do(ctx, client.B().Incr().Key("mex:total").Build())
 	}
 
-	// Guardamos goles como local de MEX
+	// Goles como local de MEX
 	if pred.HomeTeam == "MEX" {
-		client.Do(ctx, client.B().Lpush().Key("mex:home_goals").Element(
-			string(rune(pred.HomeGoals+'0')),
-		).Build())
-		client.Do(ctx, client.B().Incr().Key("mex:home:wins:"+pred.HomeTeam).Build())
+		golesStr := fmt.Sprintf("%d", pred.HomeGoals)
+		client.Do(ctx, client.B().Lpush().Key("mex:home_goals").Element(golesStr).Build())
+		// Para max y min
+		client.Do(ctx, client.B().Zadd().Key("mex:home_goals_sorted").ScoreMember().
+			ScoreMember(float64(pred.HomeGoals), golesStr+":"+pred.Timestamp).Build())
 	}
 
-	// Guardamos goles como visitante de MEX
+	// Goles como visitante de MEX
 	if pred.AwayTeam == "MEX" {
-		client.Do(ctx, client.B().Lpush().Key("mex:away_goals").Element(
-			string(rune(pred.AwayGoals+'0')),
-		).Build())
+		golesStr := fmt.Sprintf("%d", pred.AwayGoals)
+		client.Do(ctx, client.B().Lpush().Key("mex:away_goals").Element(golesStr).Build())
+		client.Do(ctx, client.B().Zadd().Key("mex:away_goals_sorted").ScoreMember().
+			ScoreMember(float64(pred.AwayGoals), golesStr+":"+pred.Timestamp).Build())
 	}
 
-	// Guardamos actividad por usuario
-	client.Do(ctx, client.B().Zincrby().Key("users:activity").Increment(1).Member(pred.Username).Build())
+	// Actividad por usuario
+	client.Do(ctx, client.B().Zincrby().Key("users:activity").
+		Increment(1).Member(pred.Username).Build())
 
-	// Serie temporal — guardamos timestamp de cada predicción de MEX
+	// Serie temporal MEX
 	if pred.HomeTeam == "MEX" || pred.AwayTeam == "MEX" {
 		score := float64(time.Now().Unix())
-		client.Do(ctx, client.B().Zadd().Key("mex:timeline").ScoreMember().ScoreMember(score, pred.Timestamp).Build())
+		client.Do(ctx, client.B().Zadd().Key("mex:timeline").ScoreMember().
+			ScoreMember(score, pred.Timestamp).Build())
 	}
 
-	// Guardamos victorias por equipo (si MEX ganó como local)
-	if pred.HomeTeam == "MEX" && pred.HomeGoals > pred.AwayGoals {
-		client.Do(ctx, client.B().Zincrby().Key("teams:wins").Increment(1).Member("MEX").Build())
+	// Victorias por equipo
+	if pred.HomeGoals > pred.AwayGoals {
+		client.Do(ctx, client.B().Zincrby().Key("teams:wins").
+			Increment(1).Member(pred.HomeTeam).Build())
+	} else if pred.AwayGoals > pred.HomeGoals {
+		client.Do(ctx, client.B().Zincrby().Key("teams:wins").
+			Increment(1).Member(pred.AwayTeam).Build())
 	}
 
-	log.Printf("Predicción almacenada en Valkey: %s vs %s | %d-%d | user: %s",
+	// Moda de goles local MEX
+	if pred.HomeTeam == "MEX" {
+		client.Do(ctx, client.B().Zincrby().Key("mex:home_goals_moda").
+			Increment(1).Member(fmt.Sprintf("%d", pred.HomeGoals)).Build())
+	}
+
+	// Moda de goles visitante MEX
+	if pred.AwayTeam == "MEX" {
+		client.Do(ctx, client.B().Zincrby().Key("mex:away_goals_moda").
+			Increment(1).Member(fmt.Sprintf("%d", pred.AwayGoals)).Build())
+	}
+
+	log.Printf("Almacenado en Valkey: %s vs %s | %d-%d | user: %s",
 		pred.HomeTeam, pred.AwayTeam, pred.HomeGoals, pred.AwayGoals, pred.Username)
 
 	return nil
@@ -135,8 +138,6 @@ func main() {
 	}
 
 	log.Println("Iniciando Consumer...")
-	log.Printf("RabbitMQ: %s", rmqURL)
-	log.Printf("Valkey: %s", valkeyAddr)
 
 	conn, ch, err := connectRabbitMQ(rmqURL)
 	if err != nil {
@@ -151,15 +152,7 @@ func main() {
 	}
 	defer valkeyClient.Close()
 
-	msgs, err := ch.Consume(
-		"predictions",
-		"",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
+	msgs, err := ch.Consume("predictions", "", true, false, false, false, nil)
 	if err != nil {
 		log.Fatalf("Error consumiendo cola: %v", err)
 	}
@@ -170,12 +163,9 @@ func main() {
 	for msg := range msgs {
 		var pred Prediction
 		if err := json.Unmarshal(msg.Body, &pred); err != nil {
-			log.Printf("Error deserializando mensaje: %v", err)
+			log.Printf("Error deserializando: %v", err)
 			continue
 		}
-
-		if err := storePrediction(ctx, valkeyClient, pred); err != nil {
-			log.Printf("Error almacenando en Valkey: %v", err)
-		}
+		storePrediction(ctx, valkeyClient, pred)
 	}
 }

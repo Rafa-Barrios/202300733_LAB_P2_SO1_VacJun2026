@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: worldcup.proto
 
-package worldcup
+package proto
 
 import (
 	context "context"
@@ -19,101 +19,102 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PredictionService_SendPrediction_FullMethodName = "/worldcup.PredictionService/SendPrediction"
+	MatchPredictionService_SendPrediction_FullMethodName = "/worldcup2026.MatchPredictionService/SendPrediction"
 )
 
-// PredictionServiceClient is the client API for PredictionService service.
+// MatchPredictionServiceClient is the client API for MatchPredictionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type PredictionServiceClient interface {
-	SendPrediction(ctx context.Context, in *PredictionRequest, opts ...grpc.CallOption) (*PredictionResponse, error)
+type MatchPredictionServiceClient interface {
+	SendPrediction(ctx context.Context, in *MatchPredictionRequest, opts ...grpc.CallOption) (*MatchPredictionResponse, error)
 }
 
-type predictionServiceClient struct {
+type matchPredictionServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewPredictionServiceClient(cc grpc.ClientConnInterface) PredictionServiceClient {
-	return &predictionServiceClient{cc}
+func NewMatchPredictionServiceClient(cc grpc.ClientConnInterface) MatchPredictionServiceClient {
+	return &matchPredictionServiceClient{cc}
 }
 
-func (c *predictionServiceClient) SendPrediction(ctx context.Context, in *PredictionRequest, opts ...grpc.CallOption) (*PredictionResponse, error) {
+func (c *matchPredictionServiceClient) SendPrediction(ctx context.Context, in *MatchPredictionRequest, opts ...grpc.CallOption) (*MatchPredictionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PredictionResponse)
-	err := c.cc.Invoke(ctx, PredictionService_SendPrediction_FullMethodName, in, out, cOpts...)
+	out := new(MatchPredictionResponse)
+	err := c.cc.Invoke(ctx, MatchPredictionService_SendPrediction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// PredictionServiceServer is the server API for PredictionService service.
-// All implementations must embed UnimplementedPredictionServiceServer
+// MatchPredictionServiceServer is the server API for MatchPredictionService service.
+// All implementations must embed UnimplementedMatchPredictionServiceServer
 // for forward compatibility.
-type PredictionServiceServer interface {
-	SendPrediction(context.Context, *PredictionRequest) (*PredictionResponse, error)
-	mustEmbedUnimplementedPredictionServiceServer()
+type MatchPredictionServiceServer interface {
+	SendPrediction(context.Context, *MatchPredictionRequest) (*MatchPredictionResponse, error)
+	mustEmbedUnimplementedMatchPredictionServiceServer()
 }
 
-// UnimplementedPredictionServiceServer must be embedded to have
+// UnimplementedMatchPredictionServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedPredictionServiceServer struct{}
+type UnimplementedMatchPredictionServiceServer struct{}
 
-func (UnimplementedPredictionServiceServer) SendPrediction(context.Context, *PredictionRequest) (*PredictionResponse, error) {
+func (UnimplementedMatchPredictionServiceServer) SendPrediction(context.Context, *MatchPredictionRequest) (*MatchPredictionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendPrediction not implemented")
 }
-func (UnimplementedPredictionServiceServer) mustEmbedUnimplementedPredictionServiceServer() {}
-func (UnimplementedPredictionServiceServer) testEmbeddedByValue()                           {}
+func (UnimplementedMatchPredictionServiceServer) mustEmbedUnimplementedMatchPredictionServiceServer() {
+}
+func (UnimplementedMatchPredictionServiceServer) testEmbeddedByValue() {}
 
-// UnsafePredictionServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to PredictionServiceServer will
+// UnsafeMatchPredictionServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MatchPredictionServiceServer will
 // result in compilation errors.
-type UnsafePredictionServiceServer interface {
-	mustEmbedUnimplementedPredictionServiceServer()
+type UnsafeMatchPredictionServiceServer interface {
+	mustEmbedUnimplementedMatchPredictionServiceServer()
 }
 
-func RegisterPredictionServiceServer(s grpc.ServiceRegistrar, srv PredictionServiceServer) {
-	// If the following call panics, it indicates UnimplementedPredictionServiceServer was
+func RegisterMatchPredictionServiceServer(s grpc.ServiceRegistrar, srv MatchPredictionServiceServer) {
+	// If the following call panics, it indicates UnimplementedMatchPredictionServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&PredictionService_ServiceDesc, srv)
+	s.RegisterService(&MatchPredictionService_ServiceDesc, srv)
 }
 
-func _PredictionService_SendPrediction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PredictionRequest)
+func _MatchPredictionService_SendPrediction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MatchPredictionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PredictionServiceServer).SendPrediction(ctx, in)
+		return srv.(MatchPredictionServiceServer).SendPrediction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PredictionService_SendPrediction_FullMethodName,
+		FullMethod: MatchPredictionService_SendPrediction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PredictionServiceServer).SendPrediction(ctx, req.(*PredictionRequest))
+		return srv.(MatchPredictionServiceServer).SendPrediction(ctx, req.(*MatchPredictionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// PredictionService_ServiceDesc is the grpc.ServiceDesc for PredictionService service.
+// MatchPredictionService_ServiceDesc is the grpc.ServiceDesc for MatchPredictionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var PredictionService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "worldcup.PredictionService",
-	HandlerType: (*PredictionServiceServer)(nil),
+var MatchPredictionService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "worldcup2026.MatchPredictionService",
+	HandlerType: (*MatchPredictionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "SendPrediction",
-			Handler:    _PredictionService_SendPrediction_Handler,
+			Handler:    _MatchPredictionService_SendPrediction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

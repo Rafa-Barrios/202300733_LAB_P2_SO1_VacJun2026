@@ -30,7 +30,6 @@ func NewWriter(url, queueName string) (*Writer, error) {
 	var conn *amqp.Connection
 	var err error
 
-	// Reintentamos la conexión hasta 10 veces porque RabbitMQ puede tardar en arrancar
 	for i := 0; i < 10; i++ {
 		conn, err = amqp.Dial(url)
 		if err == nil {
@@ -49,13 +48,12 @@ func NewWriter(url, queueName string) (*Writer, error) {
 		return nil, err
 	}
 
-	// Declaramos la cola
 	_, err = ch.QueueDeclare(
 		queueName,
-		true,  // durable
-		false, // auto-delete
-		false, // exclusive
-		false, // no-wait
+		true,
+		false,
+		false,
+		false,
 		nil,
 	)
 	if err != nil {
@@ -71,10 +69,10 @@ func NewWriter(url, queueName string) (*Writer, error) {
 	}, nil
 }
 
-func (w *Writer) Publish(req *pb.PredictionRequest) error {
+func (w *Writer) Publish(req *pb.MatchPredictionRequest) error {
 	msg := PredictionMessage{
-		HomeTeam:  req.HomeTeam,
-		AwayTeam:  req.AwayTeam,
+		HomeTeam:  req.HomeTeam.String(),
+		AwayTeam:  req.AwayTeam.String(),
 		HomeGoals: req.HomeGoals,
 		AwayGoals: req.AwayGoals,
 		Username:  req.Username,
@@ -90,10 +88,10 @@ func (w *Writer) Publish(req *pb.PredictionRequest) error {
 	defer cancel()
 
 	err = w.channel.PublishWithContext(ctx,
-		"",      // exchange
-		w.queue, // routing key
-		false,   // mandatory
-		false,   // immediate
+		"",
+		w.queue,
+		false,
+		false,
 		amqp.Publishing{
 			ContentType:  "application/json",
 			Body:         body,
@@ -105,7 +103,8 @@ func (w *Writer) Publish(req *pb.PredictionRequest) error {
 		return err
 	}
 
-	log.Printf("Mensaje publicado en RabbitMQ: %s vs %s", req.HomeTeam, req.AwayTeam)
+	log.Printf("Mensaje publicado en RabbitMQ: %s vs %s",
+		req.HomeTeam.String(), req.AwayTeam.String())
 	return nil
 }
 
