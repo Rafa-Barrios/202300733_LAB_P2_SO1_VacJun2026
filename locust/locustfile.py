@@ -1,12 +1,8 @@
 from locust import HttpUser, task, between
 import random
-import json
 from datetime import datetime, timezone
 
-TEAMS = [
-    "MEX", "GTM", "USA", "BRA", "ARG", "FRA", "ESP", "GER",
-    "ENG", "POR", "ITA", "NED", "BEL", "CRO", "URU", "COL"
-]
+TEAMS = ["GTM", "MEX", "BRA", "ARG", "ESP"]
 
 class PredictionUser(HttpUser):
     wait_time = between(1, 3)
