@@ -14,13 +14,16 @@ spec:
         cpu:
           cores: 1
         memory:
-          guest: 512Mi
+          guest: 1Gi
         devices:
           disks:
           - name: containerdisk
             disk:
               bus: virtio
           - name: cloudinitdisk
+            disk:
+              bus: virtio
+          - name: emptydisk
             disk:
               bus: virtio
           interfaces:
@@ -32,19 +35,15 @@ spec:
       volumes:
       - name: containerdisk
         containerDisk:
-          image: quay.io/containerdisks/fedora:39
+          image: quay.io/containerdisks/ubuntu:22.04
       - name: cloudinitdisk
         cloudInitNoCloud:
           userData: |
             #cloud-config
-            user: fedora
-            password: fedora123
+            user: ubuntu
+            password: ubuntu123
             chpasswd:
               expire: false
-            packages:
-              - containerd
-            runcmd:
-              - systemctl enable containerd
-              - systemctl start containerd
-              - ctr image pull docker.io/valkey/valkey:8-alpine
-              - ctr run -d --net-host docker.io/valkey/valkey:8-alpine valkey
+      - name: emptydisk
+        emptyDisk:
+          capacity: 5Gi
