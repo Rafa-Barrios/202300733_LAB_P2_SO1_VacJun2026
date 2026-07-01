@@ -75,9 +75,12 @@ func storePrediction(ctx context.Context, client valkey.Client, pred Prediction)
 	if pred.HomeTeam == "MEX" {
 		golesStr := fmt.Sprintf("%d", pred.HomeGoals)
 		client.Do(ctx, client.B().Lpush().Key("mex:home_goals").Element(golesStr).Build())
-		// Para max y min
 		client.Do(ctx, client.B().Zadd().Key("mex:home_goals_sorted").ScoreMember().
 			ScoreMember(float64(pred.HomeGoals), golesStr+":"+pred.Timestamp).Build())
+		// Serie temporal local
+		score := float64(time.Now().Unix())
+		client.Do(ctx, client.B().Zadd().Key("mex:home_goals_ts").ScoreMember().
+			ScoreMember(score, fmt.Sprintf("%d:%d", pred.HomeGoals, time.Now().UnixNano())).Build())
 	}
 
 	// Goles como visitante de MEX
@@ -86,6 +89,10 @@ func storePrediction(ctx context.Context, client valkey.Client, pred Prediction)
 		client.Do(ctx, client.B().Lpush().Key("mex:away_goals").Element(golesStr).Build())
 		client.Do(ctx, client.B().Zadd().Key("mex:away_goals_sorted").ScoreMember().
 			ScoreMember(float64(pred.AwayGoals), golesStr+":"+pred.Timestamp).Build())
+		// Serie temporal visitante
+		score := float64(time.Now().Unix())
+		client.Do(ctx, client.B().Zadd().Key("mex:away_goals_ts").ScoreMember().
+			ScoreMember(score, fmt.Sprintf("%d:%d", pred.AwayGoals, time.Now().UnixNano())).Build())
 	}
 
 	// Actividad por usuario
@@ -122,7 +129,6 @@ func storePrediction(ctx context.Context, client valkey.Client, pred Prediction)
 
 	log.Printf("Almacenado en Valkey: %s vs %s | %d-%d | user: %s",
 		pred.HomeTeam, pred.AwayTeam, pred.HomeGoals, pred.AwayGoals, pred.Username)
-
 	return nil
 }
 
