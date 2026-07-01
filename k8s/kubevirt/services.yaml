@@ -16,7 +16,7 @@ metadata:
   namespace: sopes1
 subsets:
 - addresses:
-  - ip: 10.128.0.18
+  - ip: 10.84.0.26
   ports:
   - port: 6379
 ---
@@ -38,6 +38,6 @@ metadata:
   namespace: sopes1
 subsets:
 - addresses:
-  - ip: 10.128.0.19
+  - ip: 10.84.0.23
   ports:
   - port: 3000
